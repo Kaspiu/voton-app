@@ -49,6 +49,10 @@ Use **Export data** in Workspace settings to save regular JSON backups. **Import
 
 Voton does not provide encryption for stored notes. It also does not guarantee fully offline operation: the emoji picker loads images from jsDelivr, and external images, media or other content you add may contact their providers.
 
+## Contributing
+
+Bug reports, feature suggestions and pull requests are welcome. Read the [contribution guidelines](CONTRIBUTING.md) for the workflow and checks required before submitting a change.
+
 ## Built with
 
 Next.js, React, TypeScript, Tailwind CSS and BlockNote, with IndexedDB, `idb` and Zustand for local data and state.
