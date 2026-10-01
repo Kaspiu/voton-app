@@ -2,9 +2,9 @@
 
 A local-first writing workspace for your notes and ideas.
 
-[Try Voton](https://voton.vercel.app/documents) · [Issues & ideas](https://github.com/Kaspiu/voton-app/issues)
-
 Voton is an open-source, browser-based workspace for writing and organizing notes. Your pages and folders stay on your device, with no accounts, cloud sync or analytics in the app.
+
+You can start writing in [the browser app](https://voton.vercel.app/documents) or run Voton locally. To report a bug or suggest an improvement, [open an issue](https://github.com/Kaspiu/voton-app/issues).
 
 ![The Voton writing workspace in light and dark themes](.github/voton-workspace.webp)
 
