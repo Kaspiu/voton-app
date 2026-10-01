@@ -63,7 +63,8 @@ const SettingsItem = ({
 
 export const SettingsModal = () => {
   const router = useRouter();
-  const { isOpen, onClose, restoreLastPage, setRestoreLastPage } = useSettings();
+  const { isOpen, onClose, restoreLastPage, setRestoreLastPage } =
+    useSettings();
   const { isFocusMode, setFocusMode } = useFocusMode();
   const isMac = useIsMac();
 
@@ -113,7 +114,7 @@ export const SettingsModal = () => {
             <div className="flex flex-col gap-2 mr-12">
               <Label>Theme</Label>
               <span className="text-xs text-muted-foreground">
-                Switch between light and dark mode.
+                Choose a light or dark theme, or follow your system.
               </span>
             </div>
             <ModeToggle />
@@ -125,8 +126,7 @@ export const SettingsModal = () => {
                 id="focus-mode-description"
                 className="text-xs text-muted-foreground"
               >
-                Hide the sidebar and navbar to minimize distractions while
-                working.
+                Hide the sidebar and navbar to focus on your writing.
               </span>
               <span className="flex items-center gap-2 text-xs text-muted-foreground">
                 Shortcut:
@@ -152,7 +152,7 @@ export const SettingsModal = () => {
                 id="restore-last-opened-page-description"
                 className="text-xs text-muted-foreground"
               >
-                Open your last visited page when you enter the workspace.
+                Reopen your last visited page when you return to Voton.
               </span>
             </div>
             <Switch
@@ -169,19 +169,18 @@ export const SettingsModal = () => {
 
         <h3 className="text-lg font-semibold leading-none">Data management</h3>
         <p className="text-xs text-muted-foreground">
-          Pages and folders are saved in this browser on this device. They don’t
-          sync automatically.
+          Pages and folders are saved in this browser, without automatic sync.
         </p>
         <div className="flex flex-col gap-4">
           <SettingsItem
             title="Export data"
-            description="Download a JSON backup of your pages and folders."
+            description="Download all your pages and folders as a JSON backup."
             buttonLabel="Export"
             onAction={onExportData}
           />
           <SettingsItem
             title="Import data"
-            description="Merge a Voton JSON backup, or create a page from Markdown."
+            description="Merge a Voton JSON export, or create a page from Markdown."
             buttonLabel="Import"
             onAction={onImportData}
           />
@@ -198,7 +197,7 @@ export const SettingsModal = () => {
 
         <Separator />
 
-        <div className="text-xs text-muted-foreground font-mono">v0.2.66</div>
+        <div className="text-xs text-muted-foreground font-mono">v0.2.67</div>
       </DialogContent>
     </Dialog>
   );

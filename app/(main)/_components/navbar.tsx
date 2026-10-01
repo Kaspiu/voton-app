@@ -1,8 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Clock, Copy, Ellipsis, TextInitial, Menu, Trash, X } from "lucide-react";
+import {
+  Clock,
+  Copy,
+  Download,
+  Ellipsis,
+  TextInitial,
+  Menu,
+  Trash,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { DeleteModal } from "@/components/modals/delete-modal";
@@ -15,6 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { deletePage, duplicatePage, getPage } from "@/lib/database/documents";
+import { exportPage } from "@/lib/database/export-import";
 import { useSettings } from "@/hooks/use-settings";
 import { useWordCount } from "@/hooks/use-word-count";
 
@@ -68,6 +78,8 @@ export const Navbar = ({ isCollapsed, onResetWidth }: NavbarProps) => {
   const [title, setTitle] = useState<string | undefined>(undefined);
   const [createdAt, setCreatedAt] = useState<number>();
   const [updatedAt, setUpdatedAt] = useState<number>();
+  const [isExporting, setIsExporting] = useState(false);
+  const exportInProgress = useRef(false);
 
   const formattedCreatedAt = createdAt ? formatDate(createdAt) : "";
   const formattedUpdatedAt = updatedAt ? formatRelativeTime(updatedAt) : "";
@@ -95,11 +107,6 @@ export const Navbar = ({ isCollapsed, onResetWidth }: NavbarProps) => {
     return () => window.removeEventListener("item-changed", fetchPage);
   }, [documentId]);
 
-  const onClose = () => {
-    clearLastPage();
-    router.push("/documents");
-  };
-
   const onDuplicate = () => {
     if (!documentId) return;
 
@@ -108,6 +115,28 @@ export const Navbar = ({ isCollapsed, onResetWidth }: NavbarProps) => {
       success: "Page duplicated!",
       error: "Failed to duplicate page.",
     });
+  };
+
+  const onExport = () => {
+    if (!documentId || exportInProgress.current) return;
+
+    exportInProgress.current = true;
+    setIsExporting(true);
+    const promise = exportPage(documentId).finally(() => {
+      exportInProgress.current = false;
+      setIsExporting(false);
+    });
+
+    toast.promise(promise, {
+      loading: "Preparing page export...",
+      success: "Page export ready!",
+      error: "Failed to export page. Please try again.",
+    });
+  };
+
+  const onClose = () => {
+    clearLastPage();
+    router.push("/documents");
   };
 
   const onDelete = () => {
@@ -210,17 +239,21 @@ export const Navbar = ({ isCollapsed, onResetWidth }: NavbarProps) => {
                     Duplicate
                   </DropdownMenuItem>
 
-                  <DropdownMenuItem onClick={onClose}>
+                  <DropdownMenuItem disabled={isExporting} onSelect={onExport}>
+                    <Download className="h-4 w-4 shrink-0" />
+                    Export as JSON
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuItem onSelect={onClose}>
                     <X className="h-4 w-4 shrink-0" />
                     Close
                   </DropdownMenuItem>
 
                   <DropdownMenuSeparator />
 
-                  <DeleteModal
-                    onDelete={onDelete}
-                    name={title || "Untitled"}
-                  >
+                  <DeleteModal onDelete={onDelete} name={title || "Untitled"}>
                     <DropdownMenuItem
                       onSelect={(e) => e.preventDefault()}
                       variant="destructive"

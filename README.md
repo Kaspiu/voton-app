@@ -15,7 +15,7 @@ You can start writing in [the browser app](https://voton.vercel.app/documents) o
 - **Personalize:** add page emoji and cover images, and choose folder colors.
 - **Focus:** choose light, dark or system theme, and hide navigation while writing.
 - **Continue:** duplicate pages and choose whether to reopen your last page when you return.
-- **Back up:** export JSON backups, import Voton backups or create pages from Markdown files.
+- **Back up:** export your workspace or a single page as JSON, import either Voton JSON export or create pages from Markdown files.
 
 ## Run locally
 
@@ -45,7 +45,7 @@ The build needs an internet connection to download the Geist fonts. Those fonts 
 
 Pages, folders and editor content are stored in IndexedDB in your browser. Small UI preferences use localStorage. Each browser profile and origin has its own workspace, so changing the domain, protocol or port does not transfer your notes automatically.
 
-Use **Export data** in Workspace settings to save regular JSON backups. **Import data** merges a Voton JSON backup into the current workspace, or creates a new page from a Markdown file. Backups do not include UI preferences. Clearing site data or losing a browser profile can remove your workspace.
+Use **Export data** in Workspace settings to save regular JSON backups of all your pages and folders. To export a single page, choose **Page options → Export as JSON**. Page exports preserve content, icons and cover images without including folders. **Import data** merges a Voton workspace backup or single-page JSON export into the current workspace, or creates a new page from a Markdown file. JSON exports do not include UI preferences. Clearing site data or losing a browser profile can remove your workspace.
 
 Voton does not provide encryption for stored notes. It also does not guarantee fully offline operation: the emoji picker loads images from jsDelivr, and external images, media or other content you add may contact their providers.
 

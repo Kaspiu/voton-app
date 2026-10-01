@@ -1,10 +1,10 @@
 import { getDB, runWriteTransaction } from "./database";
-import { addPage, notifyChanges, notifyDelete } from "./documents";
+import { addPage, getPage, notifyChanges, notifyDelete } from "./documents";
 import { prepareMarkdownContent, validateEditorContent } from "./content";
 import { validateHierarchy } from "./hierarchy";
 import { Folder, Page } from "./types";
 
-const EXPORT_VERSION = "0.2.66";
+const EXPORT_VERSION = "0.2.67";
 const ACCEPTED_FILE_TYPES = ".json,.md";
 
 export interface VotonExportData {
@@ -85,36 +85,14 @@ export function validateExportData(data: unknown): data is VotonExportData {
   );
 }
 
-// Reads all pages and folders from the database, serializes them to JSON, and triggers a file download.
-export async function exportData(): Promise<void> {
+function downloadFile(blob: Blob, filename: string): void {
   const link = document.createElement("a");
   let url: string | null = null;
 
   try {
-    const db = await getDB();
-    const tx = db.transaction(["pages", "folders"], "readonly");
-    const [pages, folders] = await Promise.all([
-      tx.objectStore("pages").getAll(),
-      tx.objectStore("folders").getAll(),
-      tx.done,
-    ]);
-    const exportTimestamp = new Date().toISOString();
-    const exportDate = exportTimestamp.split("T")[0];
-
-    const votonData: VotonExportData = {
-      version: EXPORT_VERSION,
-      exportDate: exportTimestamp,
-      pages,
-      folders,
-    };
-
-    const blob = new Blob([JSON.stringify(votonData, null, 2)], {
-      type: "application/json",
-    });
-
     url = URL.createObjectURL(blob);
     link.href = url;
-    link.download = `voton-export-${exportDate}.json`;
+    link.download = filename;
     link.style.display = "none";
 
     document.body.appendChild(link);
@@ -124,9 +102,79 @@ export async function exportData(): Promise<void> {
       document.body.removeChild(link);
     }
     if (url) {
-      URL.revokeObjectURL(url);
+      // Let the browser begin the download before releasing its URL.
+      const downloadUrl = url;
+      setTimeout(() => URL.revokeObjectURL(downloadUrl), 0);
     }
   }
+}
+
+function getExportFilename(title: string): string {
+  const filename = Array.from(title)
+    .filter((character) => character.charCodeAt(0) >= 32)
+    .join("")
+    .replace(/[<>:"/\\|?*]/g, "")
+    .trim()
+    .replace(/[. ]+$/, "");
+
+  return filename &&
+    !/^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(filename)
+    ? filename
+    : "Untitled";
+}
+
+// Reads all pages and folders from the database, serializes them to JSON, and triggers a file download.
+export async function exportData(): Promise<void> {
+  const db = await getDB();
+  const tx = db.transaction(["pages", "folders"], "readonly");
+  const [pages, folders] = await Promise.all([
+    tx.objectStore("pages").getAll(),
+    tx.objectStore("folders").getAll(),
+    tx.done,
+  ]);
+  const exportTimestamp = new Date().toISOString();
+  const exportDate = exportTimestamp.split("T")[0];
+
+  const votonData: VotonExportData = {
+    version: EXPORT_VERSION,
+    exportDate: exportTimestamp,
+    pages,
+    folders,
+  };
+
+  downloadFile(
+    new Blob([JSON.stringify(votonData, null, 2)], {
+      type: "application/json",
+    }),
+    `voton-export-${exportDate}.json`,
+  );
+}
+
+// Exports a fresh JSON snapshot of one page without its folder relationship.
+export async function exportPage(id: string): Promise<void> {
+  const page = await getPage(id);
+  if (!page) throw new Error("Page does not exist");
+
+  const standalonePage = { ...page };
+  delete standalonePage.parentFolder;
+  // Optional properties cleared by the UI may still exist as undefined in IndexedDB.
+  for (const prop of OPTIONAL_PAGE_PROPS) {
+    if (standalonePage[prop] === undefined) delete standalonePage[prop];
+  }
+  if (!isValidPage(standalonePage)) throw new Error("Invalid page data");
+  await validateEditorContent(standalonePage.content);
+
+  const filename = getExportFilename(standalonePage.title);
+  const data: VotonExportData = {
+    version: EXPORT_VERSION,
+    exportDate: new Date().toISOString(),
+    pages: [standalonePage],
+    folders: [],
+  };
+  downloadFile(
+    new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }),
+    `${filename}.json`,
+  );
 }
 
 // Merge and validate against the current local data under the same write lock.
