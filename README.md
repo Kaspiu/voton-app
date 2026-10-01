@@ -1,11 +1,8 @@
-<div align="center">
-  <h1>Voton</h1>
-  <p>A local-first writing workspace for your notes and ideas.</p>
-  <p>
-    <a href="https://voton.vercel.app/documents">Try Voton</a> ·
-    <a href="https://github.com/Kaspiu/voton-app/issues">Issues &amp; ideas</a>
-  </p>
-</div>
+# Voton
+
+A local-first writing workspace for your notes and ideas.
+
+[Try Voton](https://voton.vercel.app/documents) · [Issues & ideas](https://github.com/Kaspiu/voton-app/issues)
 
 Voton is an open-source, browser-based workspace for writing and organizing notes. Your pages and folders stay on your device, with no accounts, cloud sync or analytics in the app.
 
@@ -13,16 +10,18 @@ Voton is an open-source, browser-based workspace for writing and organizing note
 
 ## Features
 
-- Write with a block editor supporting rich text, lists, tables and code blocks.
-- Organize pages in nested folders and search by page title or folder path.
-- Personalize pages with emoji and cover images, and give folders their own colors.
-- Choose light, dark or system theme, and use Focus mode to hide navigation while writing.
-- Duplicate pages and choose whether to reopen your last page when you return.
-- Export a JSON backup, import Voton JSON backups or create pages from Markdown files.
+- **Write:** use a block editor with rich text, lists, tables and code blocks.
+- **Organize:** nest pages in folders and search by page title or folder path.
+- **Personalize:** add page emoji and cover images, and choose folder colors.
+- **Focus:** choose light, dark or system theme, and hide navigation while writing.
+- **Continue:** duplicate pages and choose whether to reopen your last page when you return.
+- **Back up:** export JSON backups, import Voton backups or create pages from Markdown files.
 
 ## Run locally
 
 Use **Node.js** and **npm**. No environment variables or external database are required.
+
+### Development
 
 ```bash
 git clone https://github.com/Kaspiu/voton-app.git
@@ -33,7 +32,7 @@ npm run dev
 
 Open [localhost:3000](http://localhost:3000). The root address takes you to the workspace at `/documents`.
 
-To build and run the production version:
+### Production
 
 ```bash
 npm run build
