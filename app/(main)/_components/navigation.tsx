@@ -273,7 +273,7 @@ const Navigation = () => {
                 className="group mx-1 flex h-8 cursor-pointer items-center rounded-sm py-1 text-sm font-medium transition-all hover:bg-muted-foreground/10 data-[state=open]:bg-muted-foreground/10"
               >
                 <CirclePlus className="ml-3.5 mr-2 size-4 shrink-0" />
-                <span className="mr-2 truncate">Add</span>
+                <span className="mr-2 truncate">Create</span>
                 <ChevronRight
                   className={cn(
                     "ml-auto mr-2 size-4 shrink-0 transition-all",
