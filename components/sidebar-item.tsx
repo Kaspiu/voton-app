@@ -7,8 +7,8 @@ import {
   CornerUpRight,
   Copy,
   Ellipsis,
-  FileText,
-  Folder,
+  FilePlus,
+  FolderPlus,
   LucideIcon,
   Palette,
   Pen,
@@ -45,7 +45,7 @@ import {
   updateFolder,
   updatePage,
 } from "@/lib/database/documents";
-import { cn } from "@/lib/utils";
+import { cn, handleButtonKeyDown } from "@/lib/utils";
 
 // Calculates the left margin for an item based on its nesting level.
 const calculateIndent = (expandLevel: number): string => {
@@ -230,6 +230,8 @@ export const SidebarItem = ({
     <div
       onClick={onClick}
       role="button"
+      tabIndex={0}
+      onKeyDown={handleButtonKeyDown}
       className={cn(
         "group mx-1 flex h-8 cursor-pointer items-center rounded-sm py-1 text-sm font-medium transition-all hover:bg-muted-foreground/10",
         isActive && "bg-muted-foreground/10 text-primary",
@@ -280,9 +282,15 @@ export const SidebarItem = ({
       )}
 
       {isSearch && (
-        <kbd className="pointer-events-none ml-auto mr-2 flex h-5 select-none items-center justify-center gap-1 rounded-sm border border-muted-foreground/10 bg-secondary px-2 font-mono text-xs font-medium">
-          {isMac ? "⌘ + K" : "Ctrl + K"}
-        </kbd>
+        <div className="pointer-events-none ml-auto mr-2 flex select-none items-center gap-1 text-xs font-medium">
+          <kbd className="flex h-5 items-center justify-center rounded-sm border border-muted-foreground/10 bg-secondary px-2 font-mono">
+            {isMac ? "⌘" : "Ctrl"}
+          </kbd>
+          <span>+</span>
+          <kbd className="flex h-5 items-center justify-center rounded-sm border border-muted-foreground/10 bg-secondary px-2 font-mono">
+            K
+          </kbd>
+        </div>
       )}
 
       {!!id && (
@@ -309,13 +317,13 @@ export const SidebarItem = ({
               {type === "folder" && (
                 <>
                   <DropdownMenuItem onSelect={onCreatePage}>
-                    <FileText className="h-4 w-4 shrink-0" />
-                    New page
+                    <FilePlus className="h-4 w-4 shrink-0" />
+                    Create page
                   </DropdownMenuItem>
 
                   <DropdownMenuItem onSelect={onCreateFolder}>
-                    <Folder className="h-4 w-4 shrink-0" />
-                    New folder
+                    <FolderPlus className="h-4 w-4 shrink-0" />
+                    Create folder
                   </DropdownMenuItem>
 
                   <DropdownMenuSeparator />

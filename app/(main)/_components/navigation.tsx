@@ -6,9 +6,10 @@ import Link from "next/link";
 import {
   ChevronRight,
   ChevronsLeft,
-  CirclePlus,
-  FileText,
-  Folder,
+  CircleFadingPlus,
+  FilePlus,
+  FolderPlus,
+  Keyboard,
   Menu,
   Search,
   Settings,
@@ -27,9 +28,10 @@ import {
 import { useSearch } from "@/hooks/use-search";
 import { useFocusMode } from "@/hooks/use-focus-mode";
 import { useSettings } from "@/hooks/use-settings";
+import { useShortcuts } from "@/hooks/use-shortcuts";
 import { useSidebar } from "@/hooks/use-sidebar";
 import { addFolder, addPage, getPage } from "@/lib/database/documents";
-import { cn } from "@/lib/utils";
+import { cn, handleButtonKeyDown } from "@/lib/utils";
 
 import { DocumentsList } from "./documents-list";
 import { Navbar } from "./navbar";
@@ -40,6 +42,7 @@ const MAX_SIDEBAR_WIDTH = 448;
 
 const SIDEBAR_TOGGLE_KEY = "\\";
 const NEW_PAGE_KEY = "p";
+const NEW_FOLDER_KEY = "f";
 const FOCUS_MODE_KEY = "f";
 
 const Navigation = () => {
@@ -53,6 +56,7 @@ const Navigation = () => {
   });
   const onSearchOpen = useSearch((state) => state.onOpen);
   const onSettingsOpen = useSettings((state) => state.onOpen);
+  const onShortcutsOpen = useShortcuts((state) => state.onOpen);
   const toggleFocusMode = useFocusMode((state) => state.toggleFocusMode);
   const isFocusMode = useFocusMode((state) => state.isFocusMode);
   const isCollapsed = useSidebar((state) => state.isCollapsed);
@@ -60,12 +64,36 @@ const Navigation = () => {
   const onExpand = useSidebar((state) => state.onExpand);
 
   const isResizing = useRef(false);
+  const hasResized = useRef(false);
   const sidebarRef = useRef<HTMLElement>(null);
   const navbarRef = useRef<HTMLDivElement>(null);
+  const documentsScrollRef = useRef<HTMLDivElement>(null);
+  const documentsContentRef = useRef<HTMLDivElement>(null);
   const isFocusCollapsed = useRef(false);
 
   const [isResetting, setIsResetting] = useState(false);
   const [isDocumentFound, setIsDocumentFound] = useState(true);
+  const [hasDocumentsOverflow, setHasDocumentsOverflow] = useState(false);
+
+  // Keeps both borders visible only while the documents list needs scrolling.
+  useEffect(() => {
+    const scrollElement = documentsScrollRef.current;
+    const contentElement = documentsContentRef.current;
+    if (!scrollElement || !contentElement) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      setHasDocumentsOverflow(
+        scrollElement.clientHeight > 0 &&
+          scrollElement.clientWidth > 0 &&
+          scrollElement.scrollHeight > scrollElement.clientHeight,
+      );
+    });
+
+    resizeObserver.observe(scrollElement);
+    resizeObserver.observe(contentElement);
+
+    return () => resizeObserver.disconnect();
+  }, []);
 
   // Sets sidebar width and adjusts the navbar position directly in the DOM, skipping React state.
   const applySidebarStyles = useCallback((sidebarWidth: string) => {
@@ -105,14 +133,20 @@ const Navigation = () => {
   // Starts the resize drag and registers scoped move/up listeners that clean up after themselves.
   const handleSidebarResize = useCallback(
     (e: React.MouseEvent) => {
+      if (!sidebarRef.current) return;
+
       e.preventDefault();
       e.stopPropagation();
       isResizing.current = true;
+      hasResized.current = false;
+      const startX = e.clientX;
+      const startWidth = sidebarRef.current.getBoundingClientRect().width;
 
       const onMouseMove = (event: MouseEvent) => {
         if (!isResizing.current) return;
+        if (event.clientX !== startX) hasResized.current = true;
         const newWidth = Math.min(
-          Math.max(event.clientX, MIN_SIDEBAR_WIDTH),
+          Math.max(startWidth + event.clientX - startX, MIN_SIDEBAR_WIDTH),
           MAX_SIDEBAR_WIDTH,
         );
         applySidebarStyles(`${newWidth}px`);
@@ -145,7 +179,7 @@ const Navigation = () => {
   }, [router]);
 
   // Creates a new folder in the workspace.
-  const onCreateFolder = () => {
+  const onCreateFolder = useCallback(() => {
     const promise = addFolder({ title: "New folder" });
 
     toast.promise(promise, {
@@ -153,7 +187,7 @@ const Navigation = () => {
       success: "New folder created!",
       error: "Failed to create a new folder.",
     });
-  };
+  }, []);
 
   // On mobile: collapses sidebar instantly. On desktop: sets default width.
   useEffect(() => {
@@ -198,7 +232,7 @@ const Navigation = () => {
     }
   }, [isFocusMode, documentId, isMobile, collapseSidebar, resetSidebarWidth]);
 
-  // Handle keyboard shortcuts for sidebar toggle, new page, and focus mode.
+  // Handles keyboard shortcuts for sidebar toggle, new pages and folders, and focus mode.
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.repeat) return;
@@ -211,11 +245,30 @@ const Navigation = () => {
           collapseSidebar();
         }
       }
-      if (e.key === NEW_PAGE_KEY && (e.ctrlKey || e.metaKey) && e.altKey) {
+      if (
+        (e.key.toLowerCase() === NEW_PAGE_KEY || e.code === "KeyP") &&
+        (e.ctrlKey || e.metaKey) &&
+        e.altKey &&
+        !e.shiftKey
+      ) {
         e.preventDefault();
         onCreatePage();
       }
-      if (e.key === FOCUS_MODE_KEY && (e.ctrlKey || e.metaKey) && e.altKey) {
+      if (
+        (e.key.toLowerCase() === NEW_FOLDER_KEY || e.code === "KeyF") &&
+        (e.ctrlKey || e.metaKey) &&
+        e.altKey &&
+        !e.shiftKey
+      ) {
+        e.preventDefault();
+        onCreateFolder();
+      }
+      if (
+        (e.key.toLowerCase() === FOCUS_MODE_KEY || e.code === "KeyF") &&
+        (e.ctrlKey || e.metaKey) &&
+        e.shiftKey &&
+        !e.altKey
+      ) {
         e.preventDefault();
         toggleFocusMode();
       }
@@ -228,6 +281,7 @@ const Navigation = () => {
     collapseSidebar,
     resetSidebarWidth,
     onCreatePage,
+    onCreateFolder,
     toggleFocusMode,
   ]);
 
@@ -235,80 +289,113 @@ const Navigation = () => {
     <>
       <aside
         ref={sidebarRef}
+        inert={isCollapsed}
         className={cn(
-          "group/aside relative z-50 flex h-screen w-72 flex-col overflow-x-hidden overflow-y-auto bg-secondary text-muted-foreground",
+          "group/aside relative z-100 flex h-screen w-72 flex-col bg-secondary text-muted-foreground",
           isResetting && "transition-all duration-200",
           isMobile && "w-0",
         )}
       >
-        <div className="flex items-center justify-between px-3 pt-4">
-          <Link href="/documents" className="shrink-0 select-none">
-            <Logo size="sm" className="text-primary" />
-          </Link>
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          <div className="flex items-center justify-between px-3 pt-4">
+            <Link href="/documents" className="shrink-0 select-none">
+              <Logo size="sm" className="text-primary" />
+            </Link>
+            <div
+              onClick={collapseSidebar}
+              role="button"
+              tabIndex={0}
+              onKeyDown={handleButtonKeyDown}
+              aria-label="Collapse sidebar"
+              className="flex cursor-pointer items-center justify-center rounded-md p-[3px] transition-all hover:bg-muted-foreground/10"
+            >
+              <ChevronsLeft className="h-6 w-6" />
+            </div>
+          </div>
+
+          <div className="flex w-full flex-col py-4">
+            <SidebarItem
+              onClick={onSearchOpen}
+              icon={Search}
+              label="Search"
+              isSearch
+            />
+            <SidebarItem
+              onClick={onSettingsOpen}
+              icon={Settings}
+              label="Settings"
+            />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div
+                  role="button"
+                  tabIndex={0}
+                  className="group mx-1 flex h-8 cursor-pointer items-center rounded-sm py-1 text-sm font-medium transition-all hover:bg-muted-foreground/10 data-[state=open]:bg-muted-foreground/10"
+                >
+                  <CircleFadingPlus className="ml-3.5 mr-2 size-4 shrink-0" />
+                  <span className="mr-2 truncate">Create</span>
+                  <ChevronRight
+                    className={cn(
+                      "ml-auto mr-2 size-4 shrink-0 transition-all",
+                      isMobile && "group-data-[state=open]:rotate-90",
+                    )}
+                  />
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align={isMobile ? "end" : "start"}
+                side={isMobile ? "bottom" : "right"}
+              >
+                <DropdownMenuItem onClick={onCreatePage}>
+                  <FilePlus className="h-4 w-4 shrink-0" /> New page
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={onCreateFolder}>
+                  <FolderPlus className="h-4 w-4 shrink-0" /> New folder
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          <p className="pl-4.5 pr-3 text-sm font-semibold text-muted-foreground/50">
+            Workspace
+          </p>
+
           <div
-            onClick={collapseSidebar}
-            role="button"
-            className="flex cursor-pointer items-center justify-center rounded-md p-[3px] transition-all hover:bg-muted-foreground/10"
+            ref={documentsScrollRef}
+            className={cn(
+              "doc-list-scroll mt-2 min-h-0 flex-1 overflow-y-auto border-y border-transparent",
+              hasDocumentsOverflow
+                ? "border-muted-foreground/10"
+                : "border-b-muted-foreground/10",
+            )}
           >
-            <ChevronsLeft className="h-6 w-6" />
+            <div ref={documentsContentRef}>
+              <DocumentsList />
+            </div>
+          </div>
+
+          <div className="py-2">
+            <SidebarItem
+              onClick={onShortcutsOpen}
+              icon={Keyboard}
+              label="Shortcuts"
+            />
           </div>
         </div>
 
-        <div className="flex w-full flex-col py-4">
-          <SidebarItem
-            onClick={onSearchOpen}
-            icon={Search}
-            label="Search"
-            isSearch
+        {!isMobile && !isCollapsed && (
+          <div
+            onClick={() => {
+              if (hasResized.current) {
+                hasResized.current = false;
+                return;
+              }
+              resetSidebarWidth();
+            }}
+            onMouseDown={handleSidebarResize}
+            className="absolute top-0 left-full h-full w-[3px] cursor-ew-resize bg-muted-foreground/15 opacity-0 transition-all group-hover/aside:opacity-100"
           />
-          <SidebarItem
-            onClick={onSettingsOpen}
-            icon={Settings}
-            label="Settings"
-          />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <div
-                role="button"
-                className="group mx-1 flex h-8 cursor-pointer items-center rounded-sm py-1 text-sm font-medium transition-all hover:bg-muted-foreground/10 data-[state=open]:bg-muted-foreground/10"
-              >
-                <CirclePlus className="ml-3.5 mr-2 size-4 shrink-0" />
-                <span className="mr-2 truncate">Create</span>
-                <ChevronRight
-                  className={cn(
-                    "ml-auto mr-2 size-4 shrink-0 transition-all",
-                    isMobile && "group-data-[state=open]:rotate-90",
-                  )}
-                />
-              </div>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align={isMobile ? "end" : "start"}
-              side={isMobile ? "bottom" : "right"}
-            >
-              <DropdownMenuItem onClick={onCreatePage}>
-                <FileText className="h-4 w-4 shrink-0" /> New page
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onCreateFolder}>
-                <Folder className="h-4 w-4 shrink-0" /> New folder
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        <p className="pl-4.5 pr-3 text-sm font-semibold text-muted-foreground/50">
-          Workspace
-        </p>
-
-        <div className="truncate overflow-y-auto mt-2 pb-2 doc-list-scroll">
-          <DocumentsList />
-        </div>
-
-        <div
-          onClick={!isMobile ? resetSidebarWidth : undefined}
-          onMouseDown={!isMobile ? handleSidebarResize : undefined}
-          className="absolute top-0 right-0 h-full w-[3px] cursor-ew-resize bg-muted-foreground/10 opacity-0 transition-all group-hover/aside:opacity-100"
-        />
+        )}
       </aside>
 
       <div
@@ -332,6 +419,9 @@ const Navigation = () => {
               <div
                 onClick={resetSidebarWidth}
                 role="button"
+                tabIndex={0}
+                onKeyDown={handleButtonKeyDown}
+                aria-label="Expand sidebar"
                 className="flex h-fit w-fit cursor-pointer items-center justify-center rounded-md p-[3px] text-muted-foreground transition-all hover:bg-muted-foreground/10"
               >
                 <Menu className="h-6 w-6" />

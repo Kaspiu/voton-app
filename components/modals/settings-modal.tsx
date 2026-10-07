@@ -16,7 +16,6 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { useFocusMode } from "@/hooks/use-focus-mode";
-import { useIsMac } from "@/hooks/use-is-mac";
 import { useSettings } from "@/hooks/use-settings";
 import {
   clearAllData,
@@ -66,7 +65,6 @@ export const SettingsModal = () => {
   const { isOpen, onClose, restoreLastPage, setRestoreLastPage } =
     useSettings();
   const { isFocusMode, setFocusMode } = useFocusMode();
-  const isMac = useIsMac();
 
   // Triggers a data import, closes the modal on success, and shows a toast for each state.
   const onImportData = () => {
@@ -126,13 +124,7 @@ export const SettingsModal = () => {
                 id="focus-mode-description"
                 className="text-xs text-muted-foreground"
               >
-                Hide the sidebar and navbar to focus on your writing.
-              </span>
-              <span className="flex items-center gap-2 text-xs text-muted-foreground">
-                Shortcut:
-                <kbd className="flex items-center rounded-sm border bg-secondary px-2 font-mono text-[10px]">
-                  {isMac ? "⌘ + ⌥ + F" : "Ctrl + Alt + F"}
-                </kbd>
+                Hide the sidebar and navbar while writing on desktop.
               </span>
             </div>
             <Switch
@@ -173,20 +165,18 @@ export const SettingsModal = () => {
         </p>
         <div className="flex flex-col gap-4">
           <SettingsItem
-            title="Export data"
-            description="Download all your pages and folders as a JSON backup."
-            buttonLabel="Export"
-            onAction={onExportData}
-          />
-          <SettingsItem
             title="Import data"
             description="Merge a Voton JSON export, or create a page from Markdown."
             buttonLabel="Import"
             onAction={onImportData}
           />
+          <SettingsItem
+            title="Export data"
+            description="Download all your pages and folders as a JSON backup."
+            buttonLabel="Export"
+            onAction={onExportData}
+          />
         </div>
-
-        <Separator />
 
         <SettingsItem
           title="Clear data"
@@ -197,7 +187,7 @@ export const SettingsModal = () => {
 
         <Separator />
 
-        <div className="text-xs text-muted-foreground font-mono">v0.2.67</div>
+        <div className="text-xs text-muted-foreground font-mono">v0.2.68</div>
       </DialogContent>
     </Dialog>
   );

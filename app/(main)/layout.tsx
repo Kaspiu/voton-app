@@ -5,6 +5,7 @@ import { useParams, usePathname, useRouter } from "next/navigation";
 import { MoveToCommand } from "@/components/modals/move-to-command";
 import { SearchCommand } from "@/components/modals/search-command";
 import { SettingsModal } from "@/components/modals/settings-modal";
+import { ShortcutsModal } from "@/components/modals/shortcuts-modal";
 import { Toaster } from "@/components/ui/sonner";
 import { useSettings } from "@/hooks/use-settings";
 import { getPage } from "@/lib/database/documents";
@@ -80,6 +81,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
       <SearchCommand />
       <SettingsModal />
       <MoveToCommand />
+      <ShortcutsModal />
 
       <main className="h-full flex-1 overflow-y-auto will-change-scroll">
         {children}

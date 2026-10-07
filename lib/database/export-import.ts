@@ -4,7 +4,7 @@ import { prepareMarkdownContent, validateEditorContent } from "./content";
 import { validateHierarchy } from "./hierarchy";
 import { Folder, Page } from "./types";
 
-const EXPORT_VERSION = "0.2.67";
+const EXPORT_VERSION = "0.2.68";
 const ACCEPTED_FILE_TYPES = ".json,.md";
 
 export interface VotonExportData {
@@ -287,7 +287,7 @@ async function processMarkdownFile(file: File): Promise<void> {
   });
 }
 
-// Opens a file picker, reads the selected JSON file, and imports its pages and folders into the database.
+// Opens a file picker and imports a JSON export or creates a page from Markdown.
 export async function importData(): Promise<void> {
   return new Promise((resolve, reject) => {
     const input = document.createElement("input");

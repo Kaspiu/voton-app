@@ -1,13 +1,13 @@
 "use client";
 
-import { CirclePlus } from "lucide-react";
+import { FilePlus, FolderPlus } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { useIsMac } from "@/hooks/use-is-mac";
-import { addPage } from "@/lib/database/documents";
+import { addFolder, addPage } from "@/lib/database/documents";
 
 const LOGO_SRC = "/logo.svg";
 const LOGO_SRC_DARK = "/logo-dark.svg";
@@ -27,6 +27,17 @@ const DocumentsPage = () => {
       loading: "Creating a new page...",
       success: "New page created!",
       error: "Failed to create a new page.",
+    });
+  };
+
+  // Creates a new folder in the workspace and shows a toast for each state.
+  const onCreateFolder = () => {
+    const promise = addFolder({ title: "New folder" });
+
+    toast.promise(promise, {
+      loading: "Creating a new folder...",
+      success: "New folder created!",
+      error: "Failed to create a new folder.",
     });
   };
 
@@ -50,30 +61,40 @@ const DocumentsPage = () => {
       <h1 className="text-2xl font-bold">Welcome to Voton!</h1>
       <h3 className="text-lg font-medium">What&apos;s on your mind today?</h3>
 
-      <Button onClick={onCreate} size="lg" className="mt-4 mb-6 cursor-pointer">
-        <CirclePlus />
-        Create a page
-      </Button>
+      <div className="my-4 flex flex-wrap items-start justify-center gap-4 px-4">
+        <Button
+          onClick={onCreate}
+          variant="outline"
+          size="lg"
+          className="cursor-pointer"
+        >
+          <FilePlus />
+          Create a page
+        </Button>
+        <Button
+          onClick={onCreateFolder}
+          variant="outline"
+          size="lg"
+          className="cursor-pointer"
+        >
+          <FolderPlus />
+          Create a folder
+        </Button>
+      </div>
 
-      <div className="flex flex-col items-center gap-2 text-xs font-medium text-muted-foreground pointer-events-none select-none">
-        <div className="flex items-center gap-2">
-          <span>Show/Hide sidebar</span>
-          <kbd className="flex items-center px-2 font-mono border bg-secondary rounded-sm">
-            {isMac ? "⌘ + \\" : "Ctrl + \\"}
+      <div className="pointer-events-none flex select-none flex-wrap items-center justify-center gap-2 px-4 text-xs font-medium text-muted-foreground">
+        <span>Show all shortcuts</span>
+        <div className="flex items-center gap-1">
+          <kbd className="flex items-center rounded-sm border bg-secondary px-2 font-mono">
+            {isMac ? "⌘" : "Ctrl"}
           </kbd>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span>Create new page</span>
-          <kbd className="flex items-center px-2 font-mono border bg-secondary rounded-sm">
-            {isMac ? "⌘ + ⌥ + P" : "Ctrl + Alt + P"}
+          <span>+</span>
+          <kbd className="flex items-center rounded-sm border bg-secondary px-2 font-mono">
+            {isMac ? "⌥" : "Alt"}
           </kbd>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span>Toggle focus mode</span>
-          <kbd className="flex items-center px-2 font-mono border bg-secondary rounded-sm">
-            {isMac ? "⌘ + ⌥ + F" : "Ctrl + Alt + F"}
+          <span>+</span>
+          <kbd className="flex items-center rounded-sm border bg-secondary px-2 font-mono">
+            /
           </kbd>
         </div>
       </div>

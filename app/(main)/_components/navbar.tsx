@@ -27,6 +27,7 @@ import { deletePage, duplicatePage, getPage } from "@/lib/database/documents";
 import { exportPage } from "@/lib/database/export-import";
 import { useSettings } from "@/hooks/use-settings";
 import { useWordCount } from "@/hooks/use-word-count";
+import { handleButtonKeyDown } from "@/lib/utils";
 
 const MS_PER_MINUTE = 60000;
 const MS_PER_HOUR = 60 * MS_PER_MINUTE;
@@ -159,6 +160,9 @@ export const Navbar = ({ isCollapsed, onResetWidth }: NavbarProps) => {
         <div
           onClick={onResetWidth}
           role="button"
+          tabIndex={0}
+          onKeyDown={handleButtonKeyDown}
+          aria-label="Expand sidebar"
           className="h-fit w-fit cursor-pointer rounded-md p-[3px] text-muted-foreground transition-all hover:bg-muted-foreground/10"
         >
           <Menu className="h-6 w-6 shrink-0" />
@@ -183,6 +187,8 @@ export const Navbar = ({ isCollapsed, onResetWidth }: NavbarProps) => {
                   <DropdownMenuTrigger asChild>
                     <div
                       role="button"
+                      tabIndex={0}
+                      aria-label="Page dates"
                       className="h-fit w-fit cursor-pointer rounded-md p-[7px] text-muted-foreground transition-all hover:bg-muted-foreground/10 data-[state=open]:bg-muted-foreground/10"
                     >
                       <Clock className="h-4 w-4 shrink-0" />
@@ -204,6 +210,8 @@ export const Navbar = ({ isCollapsed, onResetWidth }: NavbarProps) => {
                 <DropdownMenuTrigger asChild>
                   <div
                     role="button"
+                    tabIndex={0}
+                    aria-label="Word and character counts"
                     className="h-fit w-fit cursor-pointer rounded-md p-[7px] text-muted-foreground transition-all hover:bg-muted-foreground/10 data-[state=open]:bg-muted-foreground/10"
                   >
                     <TextInitial className="h-4 w-4 shrink-0" />

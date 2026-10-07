@@ -13,7 +13,8 @@ You can start writing in [the browser app](https://voton.vercel.app/documents) o
 - **Write:** use a block editor with rich text, lists, tables and code blocks.
 - **Organize:** nest pages in folders and search by page title or folder path.
 - **Personalize:** add page emoji and cover images, and choose folder colors.
-- **Focus:** choose light, dark or system theme, and hide navigation while writing.
+- **Focus:** choose light, dark or system theme, and hide navigation while writing on desktop.
+- **Keyboard shortcuts:** search pages, create pages and folders, toggle the sidebar and switch focus mode. Open the guide from **Shortcuts** in the sidebar or with **Ctrl+Alt+/** (**Cmd+Option+/** on macOS).
 - **Continue:** duplicate pages and choose whether to reopen your last page when you return.
 - **Back up:** export your workspace or a single page as JSON, import either Voton JSON export or create pages from Markdown files.
 
