@@ -321,12 +321,12 @@ export const SidebarItem = ({
                 <>
                   <DropdownMenuItem onSelect={onCreatePage}>
                     <FilePlus className="h-4 w-4 shrink-0" />
-                    Create page
+                    New page here
                   </DropdownMenuItem>
 
                   <DropdownMenuItem onSelect={onCreateFolder}>
                     <FolderPlus className="h-4 w-4 shrink-0" />
-                    Create folder
+                    New folder here
                   </DropdownMenuItem>
 
                   <DropdownMenuSeparator />

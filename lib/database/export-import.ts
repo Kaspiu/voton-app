@@ -4,7 +4,7 @@ import { prepareMarkdownContent, validateEditorContent } from "./content";
 import { validateHierarchy } from "./hierarchy";
 import { Folder, Page } from "./types";
 
-const EXPORT_VERSION = "0.2.7";
+const EXPORT_VERSION = "0.2.70";
 const ACCEPTED_FILE_TYPES = ".json,.md";
 
 export interface VotonExportData {

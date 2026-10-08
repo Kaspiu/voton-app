@@ -7,7 +7,8 @@ export function handleButtonKeyDown(event: KeyboardEvent<HTMLElement>): void {
     event.target !== event.currentTarget ||
     event.repeat ||
     (event.key !== "Enter" && event.key !== " ")
-  ) return;
+  )
+    return;
 
   event.preventDefault();
   event.currentTarget.click();

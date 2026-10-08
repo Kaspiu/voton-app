@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { notFound, useParams } from "next/navigation";
 
@@ -13,7 +13,20 @@ import { Page } from "@/lib/database/types";
 
 const Editor = dynamic(() => import("@/components/editor"), { ssr: false });
 
-const DocumentIdPage = () => {
+const DocumentSkeleton = () => (
+  <div className="mt-[62px]">
+    <Skeleton className="h-[15vh] w-full" />
+    <div className="mt-17 max-w-5xl space-y-4 pl-21">
+      <Skeleton className="mb-15 h-14 w-1/4" />
+      <Skeleton className="h-5 w-3/4 rounded-sm" />
+      <Skeleton className="h-5 w-2/5 rounded-sm" />
+      <Skeleton className="h-5 w-3/5 rounded-sm" />
+      <Skeleton className="h-5 w-1/2 rounded-sm" />
+    </div>
+  </div>
+);
+
+const DocumentIdPageContent = () => {
   const [page, setPage] = useState<Page | null | undefined>(undefined);
   const params = useParams();
   const documentId = params.documentId as string;
@@ -37,20 +50,7 @@ const DocumentIdPage = () => {
     if (documentId) updatePage(documentId, { content });
   };
 
-  if (page === undefined) {
-    return (
-      <div className="mt-[62px]">
-        <Skeleton className="h-[15vh] w-full" />
-        <div className="mt-17 max-w-5xl space-y-4 pl-21">
-          <Skeleton className="mb-15 h-14 w-1/4" />
-          <Skeleton className="h-5 w-3/4 rounded-sm" />
-          <Skeleton className="h-5 w-2/5 rounded-sm" />
-          <Skeleton className="h-5 w-3/5 rounded-sm" />
-          <Skeleton className="h-5 w-1/2 rounded-sm" />
-        </div>
-      </div>
-    );
-  }
+  if (page === undefined) return <DocumentSkeleton />;
 
   if (page === null) return notFound();
 
@@ -63,5 +63,11 @@ const DocumentIdPage = () => {
     </div>
   );
 };
+
+const DocumentIdPage = () => (
+  <Suspense fallback={<DocumentSkeleton />}>
+    <DocumentIdPageContent />
+  </Suspense>
+);
 
 export default DocumentIdPage;

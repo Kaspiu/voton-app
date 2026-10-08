@@ -1,17 +1,28 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { MoveToCommand } from "@/components/modals/move-to-command";
 import { SearchCommand } from "@/components/modals/search-command";
 import { SettingsModal } from "@/components/modals/settings-modal";
 import { ShortcutsModal } from "@/components/modals/shortcuts-modal";
+import { Spinner } from "@/components/ui/spinner";
 import { Toaster } from "@/components/ui/sonner";
 import { useSettings } from "@/hooks/use-settings";
 import { getPage } from "@/lib/database/documents";
 import Navigation from "./_components/navigation";
 
-const MainLayout = ({ children }: { children: React.ReactNode }) => {
+const MainLayoutLoading = () => (
+  <div
+    className="flex h-dvh flex-col items-center justify-center gap-3 bg-background text-muted-foreground dark:bg-[#1F1F1F]"
+    role="status"
+  >
+    <Spinner aria-hidden="true" className="size-6" />
+    <p className="text-sm">Loading workspace…</p>
+  </div>
+);
+
+const MainLayoutContent = ({ children }: { children: React.ReactNode }) => {
   const params = useParams();
   const documentId =
     typeof params.documentId === "string" ? params.documentId : undefined;
@@ -49,7 +60,8 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
         if (
           !preferences.restoreLastPage ||
           preferences.lastPageId !== lastPageId
-        ) return;
+        )
+          return;
 
         if (page) {
           router.replace(`/documents/${encodeURIComponent(page.id)}`);
@@ -66,7 +78,14 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
     return () => {
       cancelled = true;
     };
-  }, [documentId, pathname, router, loadPreferences, rememberPage, clearLastPage]);
+  }, [
+    documentId,
+    pathname,
+    router,
+    loadPreferences,
+    rememberPage,
+    clearLastPage,
+  ]);
 
   useEffect(() => {
     document.body.classList.add("overflow-hidden");
@@ -91,5 +110,11 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
     </div>
   );
 };
+
+const MainLayout = ({ children }: { children: React.ReactNode }) => (
+  <Suspense fallback={<MainLayoutLoading />}>
+    <MainLayoutContent>{children}</MainLayoutContent>
+  </Suspense>
+);
 
 export default MainLayout;
