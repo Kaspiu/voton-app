@@ -187,7 +187,7 @@ export const SettingsModal = () => {
 
         <Separator />
 
-        <div className="text-xs text-muted-foreground font-mono">v0.2.68</div>
+        <div className="text-xs text-muted-foreground font-mono">v0.2.7</div>
       </DialogContent>
     </Dialog>
   );

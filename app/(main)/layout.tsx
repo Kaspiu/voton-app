@@ -76,7 +76,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <div className="flex h-screen bg-background dark:bg-[#1F1F1F]">
+    <div className="flex h-dvh bg-background dark:bg-[#1F1F1F]">
       <Navigation />
       <SearchCommand />
       <SettingsModal />

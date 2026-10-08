@@ -95,11 +95,39 @@ export const DocumentsList = ({
   );
   const [isExpanded, setIsExpanded] =
     useState<Record<string, boolean>>(loadExpandedState);
+  const [mountedFolders, setMountedFolders] =
+    useState<Record<string, boolean>>(isExpanded);
   const [pinned, setPinned] =
     useState<Record<string, boolean>>(loadPinnedState);
 
+  // Also releases closing lists when a transition is skipped or interrupted.
+  useEffect(() => {
+    const closingIds = Object.keys(mountedFolders).filter(
+      (id) => mountedFolders[id] && !isExpanded[id],
+    );
+    if (closingIds.length === 0) return;
+
+    const timeout = window.setTimeout(() => {
+      setMountedFolders((prev) => {
+        const next = { ...prev };
+        for (const id of closingIds) delete next[id];
+        return next;
+      });
+    }, 200);
+
+    return () => window.clearTimeout(timeout);
+  }, [isExpanded, mountedFolders]);
+
   // Toggles the expansion state of a folder in both state and localStorage.
   const onExpand = (id: string) => {
+    const children = document.getElementById(`folder-children-${id}`);
+    if (children?.contains(document.activeElement)) {
+      document.getElementById(`folder-trigger-${id}`)?.focus();
+    }
+
+    setMountedFolders((prev) =>
+      prev[id] ? prev : { ...prev, [id]: true },
+    );
     setIsExpanded((prev) => {
       const newValue = !prev[id];
       saveExpandedState(id, newValue);
@@ -235,11 +263,36 @@ export const DocumentsList = ({
             type={doc.type}
           />
 
-          {isExpanded[doc.id] && (
-            <DocumentsList
-              parentDocumentId={doc.id}
-              expandLevel={expandLevel + 1}
-            />
+          {doc.type === "folder" && (
+            <div
+              id={`folder-children-${doc.id}`}
+              inert={!isExpanded[doc.id]}
+              className={cn(
+                "overflow-hidden transition-all [interpolate-size:allow-keywords] [transition-behavior:allow-discrete]",
+                isExpanded[doc.id] ? "h-auto" : "h-0",
+              )}
+              onTransitionEnd={(event) => {
+                if (
+                  event.target !== event.currentTarget ||
+                  event.propertyName !== "height" ||
+                  isExpanded[doc.id]
+                ) return;
+
+                setMountedFolders((prev) => {
+                  if (!prev[doc.id]) return prev;
+                  const next = { ...prev };
+                  delete next[doc.id];
+                  return next;
+                });
+              }}
+            >
+              {(isExpanded[doc.id] || mountedFolders[doc.id]) && (
+                <DocumentsList
+                  parentDocumentId={doc.id}
+                  expandLevel={expandLevel + 1}
+                />
+              )}
+            </div>
           )}
         </div>
       ))}

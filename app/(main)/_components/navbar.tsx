@@ -170,7 +170,7 @@ export const Navbar = ({ isCollapsed, onResetWidth }: NavbarProps) => {
       )}
       <div className="flex h-[30px] min-w-0 flex-1 items-center justify-between gap-4">
         {title === undefined ? (
-          <Skeleton className="h-6 w-19" />
+          <Skeleton className="h-6 w-17" />
         ) : (
           <span className="truncate text-lg font-medium text-muted-foreground">
             {title}

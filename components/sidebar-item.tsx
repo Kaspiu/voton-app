@@ -228,6 +228,9 @@ export const SidebarItem = ({
 
   return (
     <div
+      id={id && type === "folder" ? `folder-trigger-${id}` : undefined}
+      aria-expanded={id && type === "folder" ? !!isExpanded : undefined}
+      aria-controls={id && type === "folder" ? `folder-children-${id}` : undefined}
       onClick={onClick}
       role="button"
       tabIndex={0}

@@ -19,12 +19,6 @@ import { useMediaQuery } from "usehooks-ts";
 
 import { Logo } from "@/components/logo";
 import { SidebarItem } from "@/components/sidebar-item";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useSearch } from "@/hooks/use-search";
 import { useFocusMode } from "@/hooks/use-focus-mode";
 import { useSettings } from "@/hooks/use-settings";
@@ -67,6 +61,7 @@ const Navigation = () => {
   const hasResized = useRef(false);
   const sidebarRef = useRef<HTMLElement>(null);
   const navbarRef = useRef<HTMLDivElement>(null);
+  const createMenuRef = useRef<HTMLDetailsElement>(null);
   const documentsScrollRef = useRef<HTMLDivElement>(null);
   const documentsContentRef = useRef<HTMLDivElement>(null);
   const isFocusCollapsed = useRef(false);
@@ -165,8 +160,23 @@ const Navigation = () => {
     [applySidebarStyles],
   );
 
+  const closeCreateMenu = useCallback(() => {
+    const menu = createMenuRef.current;
+    if (!menu) return;
+
+    const summary = menu.querySelector("summary");
+    if (
+      menu.contains(document.activeElement) &&
+      document.activeElement !== summary
+    ) {
+      summary?.focus();
+    }
+    menu.open = false;
+  }, []);
+
   // Creates a new untitled page and navigates to it.
   const onCreatePage = useCallback(() => {
+    closeCreateMenu();
     const promise = addPage({ title: "Untitled" }).then((page) => {
       if (page) router.push(`/documents/${page.id}`);
     });
@@ -176,10 +186,11 @@ const Navigation = () => {
       success: "New page created!",
       error: "Failed to create a new page.",
     });
-  }, [router]);
+  }, [closeCreateMenu, router]);
 
   // Creates a new folder in the workspace.
   const onCreateFolder = useCallback(() => {
+    closeCreateMenu();
     const promise = addFolder({ title: "New folder" });
 
     toast.promise(promise, {
@@ -187,7 +198,7 @@ const Navigation = () => {
       success: "New folder created!",
       error: "Failed to create a new folder.",
     });
-  }, []);
+  }, [closeCreateMenu]);
 
   // On mobile: collapses sidebar instantly. On desktop: sets default width.
   useEffect(() => {
@@ -291,7 +302,7 @@ const Navigation = () => {
         ref={sidebarRef}
         inert={isCollapsed}
         className={cn(
-          "group/aside relative z-100 flex h-screen w-72 flex-col bg-secondary text-muted-foreground",
+          "group/aside relative z-[55] flex h-full w-72 flex-col bg-secondary text-muted-foreground",
           isResetting && "transition-all duration-200",
           isMobile && "w-0",
         )}
@@ -325,35 +336,31 @@ const Navigation = () => {
               icon={Settings}
               label="Settings"
             />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <div
-                  role="button"
-                  tabIndex={0}
-                  className="group mx-1 flex h-8 cursor-pointer items-center rounded-sm py-1 text-sm font-medium transition-all hover:bg-muted-foreground/10 data-[state=open]:bg-muted-foreground/10"
-                >
-                  <CircleFadingPlus className="ml-3.5 mr-2 size-4 shrink-0" />
-                  <span className="mr-2 truncate">Create</span>
-                  <ChevronRight
-                    className={cn(
-                      "ml-auto mr-2 size-4 shrink-0 transition-all",
-                      isMobile && "group-data-[state=open]:rotate-90",
-                    )}
-                  />
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align={isMobile ? "end" : "start"}
-                side={isMobile ? "bottom" : "right"}
-              >
-                <DropdownMenuItem onClick={onCreatePage}>
-                  <FilePlus className="h-4 w-4 shrink-0" /> New page
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={onCreateFolder}>
-                  <FolderPlus className="h-4 w-4 shrink-0" /> New folder
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <details
+              ref={createMenuRef}
+              className="group [interpolate-size:allow-keywords] [&::details-content]:h-0 [&::details-content]:overflow-hidden [&::details-content]:transition-all [&::details-content]:[transition-behavior:allow-discrete] open:[&::details-content]:h-auto"
+            >
+              <summary className="mx-1 flex h-8 cursor-pointer list-none items-center rounded-sm py-1 text-sm font-medium transition-all hover:bg-muted-foreground/10">
+                <CircleFadingPlus className="ml-3.5 mr-2 size-4 shrink-0" />
+                <span className="mr-2 truncate">Create</span>
+                <ChevronRight
+                  className="ml-auto mr-2 size-4 shrink-0 transition-all group-open:rotate-90"
+                  aria-hidden="true"
+                />
+              </summary>
+              <SidebarItem
+                onClick={onCreatePage}
+                icon={FilePlus}
+                label="New page"
+                expandLevel={1}
+              />
+              <SidebarItem
+                onClick={onCreateFolder}
+                icon={FolderPlus}
+                label="New folder"
+                expandLevel={1}
+              />
+            </details>
           </div>
 
           <p className="pl-4.5 pr-3 text-sm font-semibold text-muted-foreground/50">
@@ -365,7 +372,7 @@ const Navigation = () => {
             className={cn(
               "doc-list-scroll mt-2 min-h-0 flex-1 overflow-y-auto border-y border-transparent",
               hasDocumentsOverflow
-                ? "border-muted-foreground/10"
+                ? "border-muted-foreground/15"
                 : "border-b-muted-foreground/10",
             )}
           >
