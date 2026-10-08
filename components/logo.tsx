@@ -2,9 +2,8 @@ import { cva, type VariantProps } from "class-variance-authority";
 import Image from "next/image";
 
 import { cn } from "@/lib/utils";
-
-const LOGO_SRC = "/logo.svg";
-const LOGO_SRC_DARK = "/logo-dark.svg";
+import logo from "@/public/logo.svg";
+import logoDark from "@/public/logo-dark.svg";
 
 const textVariants = cva("font-bold", {
   variants: {
@@ -35,14 +34,14 @@ export const Logo = ({ size, className }: LogoProps) => {
   return (
     <div className={cn("flex items-center justify-center", className)}>
       <Image
-        src={LOGO_SRC}
+        src={logo}
         width={imageSize}
         height={imageSize}
         alt="Logo"
         className="dark:hidden"
       />
       <Image
-        src={LOGO_SRC_DARK}
+        src={logoDark}
         width={imageSize}
         height={imageSize}
         alt="Logo"

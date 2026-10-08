@@ -90,13 +90,18 @@ const Navigation = () => {
     return () => resizeObserver.disconnect();
   }, []);
 
-  // Sets sidebar width and adjusts the navbar position directly in the DOM, skipping React state.
-  const applySidebarStyles = useCallback((sidebarWidth: string) => {
-    if (!sidebarRef.current || !navbarRef.current) return;
-    sidebarRef.current.style.width = sidebarWidth;
-    navbarRef.current.style.left = sidebarWidth;
-    navbarRef.current.style.width = `calc(100% - ${sidebarWidth})`;
-  }, []);
+  // Mobile navigation overlays the workspace; only desktop navigation offsets the navbar.
+  const applySidebarStyles = useCallback(
+    (sidebarWidth: string) => {
+      if (!sidebarRef.current || !navbarRef.current) return;
+      sidebarRef.current.style.width = sidebarWidth;
+      navbarRef.current.style.left = isMobile ? "0px" : sidebarWidth;
+      navbarRef.current.style.width = isMobile
+        ? "100%"
+        : `calc(100% - ${sidebarWidth})`;
+    },
+    [isMobile],
+  );
 
   // Hides the sidebar instantly without animation — safe to call inside useEffect bodies.
   const collapseDOM = useCallback(() => {
@@ -302,7 +307,7 @@ const Navigation = () => {
         ref={sidebarRef}
         inert={isCollapsed}
         className={cn(
-          "group/aside relative z-[55] flex h-full w-72 flex-col bg-secondary text-muted-foreground",
+          "group/aside relative z-[55] flex h-full w-72 shrink-0 flex-col bg-secondary text-muted-foreground [@media(width<=1024px)]:fixed [@media(width<=1024px)]:top-0 [@media(width<=1024px)]:left-0",
           isResetting && "transition-all duration-200",
           isMobile && "w-0",
         )}
@@ -407,6 +412,7 @@ const Navigation = () => {
 
       <div
         ref={navbarRef}
+        inert={isMobile && !isCollapsed}
         className={cn(
           "fixed top-0 left-72 z-50 w-[calc(100%-288px)]",
           isResetting && "transition-all duration-200",
@@ -419,10 +425,13 @@ const Navigation = () => {
         )}
       >
         {documentId && isDocumentFound ? (
-          <Navbar isCollapsed={isCollapsed} onResetWidth={resetSidebarWidth} />
+          <Navbar
+            isCollapsed={isMobile || isCollapsed}
+            onResetWidth={resetSidebarWidth}
+          />
         ) : (
-          <nav className="w-full p-4 pt-6">
-            {isCollapsed && (
+          <nav className="w-full p-4">
+            {(isMobile || isCollapsed) && (
               <div
                 onClick={resetSidebarWidth}
                 role="button"

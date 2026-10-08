@@ -8,9 +8,9 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useIsMac } from "@/hooks/use-is-mac";
 import { addFolder, addPage } from "@/lib/database/documents";
+import logo from "@/public/logo.svg";
+import logoDark from "@/public/logo-dark.svg";
 
-const LOGO_SRC = "/logo.svg";
-const LOGO_SRC_DARK = "/logo-dark.svg";
 const LOGO_SIZE = 100;
 
 const DocumentsPage = () => {
@@ -42,16 +42,16 @@ const DocumentsPage = () => {
   };
 
   return (
-    <div className="flex h-screen flex-col items-center justify-center truncate text-center">
+    <div className="flex min-h-full flex-col items-center justify-center truncate text-center">
       <Image
-        src={LOGO_SRC}
+        src={logo}
         width={LOGO_SIZE}
         height={LOGO_SIZE}
         alt="Logo"
         className="dark:hidden"
       />
       <Image
-        src={LOGO_SRC_DARK}
+        src={logoDark}
         width={LOGO_SIZE}
         height={LOGO_SIZE}
         alt="Logo"

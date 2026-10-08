@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/providers/theme-provider";
+import logo from "@/public/logo.svg";
+import logoDark from "@/public/logo-dark.svg";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,11 +26,11 @@ export const metadata: Metadata = {
     icon: [
       {
         media: "(prefers-color-scheme: light)",
-        url: "/logo.svg",
+        url: logo.src,
       },
       {
         media: "(prefers-color-scheme: dark)",
-        url: "/logo-dark.svg",
+        url: logoDark.src,
       },
     ],
   },

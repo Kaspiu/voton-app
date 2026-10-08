@@ -102,7 +102,7 @@ const MainLayoutContent = ({ children }: { children: React.ReactNode }) => {
       <MoveToCommand />
       <ShortcutsModal />
 
-      <main className="h-full flex-1 overflow-y-auto will-change-scroll">
+      <main className="h-full min-w-0 flex-1 overflow-y-auto will-change-scroll">
         {children}
       </main>
 

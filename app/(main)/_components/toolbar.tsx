@@ -67,7 +67,7 @@ export const Toolbar = ({ initialData }: ToolbarProps) => {
     <div
       className={cn(
         "group mb-12 mt-6 flex flex-col justify-center px-21 max-lg:px-13.5 transition-all duration-200",
-        isCollapsed && "px-42",
+        isCollapsed && "[@media(width>1024px)]:px-42",
       )}
     >
       <div
@@ -102,7 +102,7 @@ export const Toolbar = ({ initialData }: ToolbarProps) => {
       </div>
 
       {!!initialData.icon && (
-        <div className="group/icon mb-2 flex w-fit items-center">
+        <div className="group/icon mb-2 flex w-fit items-center gap-2">
           <EmojiPickerPopover onEmojiClick={onEmojiSelect}>
             <p className="cursor-pointer text-6xl max-lg:text-5xl transition-all hover:opacity-75">
               {initialData.icon}

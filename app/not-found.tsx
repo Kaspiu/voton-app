@@ -3,32 +3,34 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import errorIllustration from "@/public/error.webp";
+import errorIllustrationDark from "@/public/error-dark.webp";
 
 export const metadata: Metadata = {
   title: { absolute: "Page Not Found - Voton" },
   description: "The page you are looking for could not be found.",
 };
 
-const ERROR_IMAGE_SRC = "/error.webp";
-const ERROR_IMAGE_SRC_DARK = "/error-dark.webp";
 const ERROR_IMAGE_WIDTH = 300;
 const ERROR_IMAGE_HEIGHT = 150;
 
 const NotFound = () => {
   return (
-    <div className="flex h-screen w-full flex-col items-center justify-center truncate text-center">
+    <div className="flex min-h-dvh w-full flex-col items-center justify-center truncate text-center">
       <Image
-        src={ERROR_IMAGE_SRC}
+        src={errorIllustration}
         width={ERROR_IMAGE_WIDTH}
         height={ERROR_IMAGE_HEIGHT}
         alt="Page not found illustration"
+        unoptimized
         className="dark:hidden"
       />
       <Image
-        src={ERROR_IMAGE_SRC_DARK}
+        src={errorIllustrationDark}
         width={ERROR_IMAGE_WIDTH}
         height={ERROR_IMAGE_HEIGHT}
         alt="Page not found illustration"
+        unoptimized
         className="hidden dark:block"
       />
       <h1 className="text-2xl font-bold">Ooops!</h1>

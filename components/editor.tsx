@@ -159,7 +159,7 @@ export default function Editor({ onChange, initialData }: EditorProps) {
       theme={resolvedTheme === "light" ? "light" : "dark"}
       className={cn(
         "px-7.5 max-lg:px-0 transition-all duration-200",
-        isCollapsed && "px-29.5",
+        isCollapsed && "[@media(width>1024px)]:px-29.5",
       )}
     />
   );
